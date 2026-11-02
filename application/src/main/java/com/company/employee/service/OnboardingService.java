@@ -66,4 +66,9 @@ public class OnboardingService {
                 .filter(task -> task.getEmployeeId().equals(employeeId))
                 .toList();
     }
+
+    public boolean employeeExists(Long employeeId) {
+    return employees.stream()
+            .anyMatch(employee -> employee.getId().equals(employeeId));
+    }
 }
