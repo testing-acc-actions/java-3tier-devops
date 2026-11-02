@@ -4,46 +4,43 @@ package com.company.employee.service;
 import com.company.employee.model.Approval;
 import com.company.employee.model.Employee;
 import com.company.employee.model.OnboardingTask;
+import com.company.employee.model.Notification;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class OnboardingService {
 
-    // Temporary in-memory storage
     private final List<Employee> employees = new ArrayList<>();
     private final List<OnboardingTask> tasks = new ArrayList<>();
     private final List<Approval> approvals = new ArrayList<>();
+    private final List<Notification> notifications = new ArrayList<>();
 
-    // Unique ID counters
     private Long employeeIdCounter = 1L;
     private Long taskIdCounter = 1L;
     private Long approvalIdCounter = 1L;
+    private Long notificationIdCounter = 1L;
 
-    // Register a new employee
     public Employee registerEmployee(Employee employee) {
 
         employee.setId(employeeIdCounter++);
         employee.setStatus("PENDING_APPROVAL");
 
         employees.add(employee);
-
-        // Automatically generate five onboarding tasks
         generateOnboardingTasks(employee);
-
-        // Automatically create manager approval
         createApproval(employee);
 
         return employee;
     }
 
-    // Generate standard onboarding tasks
     private void generateOnboardingTasks(Employee employee) {
-
         createTask(employee, "Laptop allocation", "IT");
         createTask(employee, "Email setup", "IT");
         createTask(employee, "Software access", "IT");
@@ -51,7 +48,6 @@ public class OnboardingService {
         createTask(employee, "Team introduction", "Manager");
     }
 
-    // Create an individual onboarding task
     private void createTask(
             Employee employee,
             String taskName,
@@ -69,7 +65,6 @@ public class OnboardingService {
         tasks.add(task);
     }
 
-    // Create manager approval record
     private void createApproval(Employee employee) {
 
         Approval approval = new Approval();
@@ -84,31 +79,122 @@ public class OnboardingService {
         approvals.add(approval);
     }
 
-    // Retrieve all employees
     public List<Employee> getAllEmployees() {
         return employees;
     }
 
-    // Retrieve all pending manager approvals
     public List<Approval> getPendingApprovals() {
-
         return approvals.stream()
                 .filter(approval -> "PENDING".equals(approval.getStatus()))
                 .toList();
     }
 
-    // Retrieve tasks belonging to one employee
     public List<OnboardingTask> getTasksByEmployee(Long employeeId) {
-
         return tasks.stream()
                 .filter(task -> task.getEmployeeId().equals(employeeId))
                 .toList();
     }
 
-    // Check whether an employee exists
     public boolean employeeExists(Long employeeId) {
-
         return employees.stream()
                 .anyMatch(employee -> employee.getId().equals(employeeId));
+    }
+
+    // Approve an employee onboarding request
+    public Approval approveRequest(Long approvalId) {
+
+        Approval approval = findPendingApproval(approvalId);
+
+        approval.setStatus("APPROVED");
+        approval.setComments("Approved by manager");
+        approval.setDecisionDate(LocalDate.now());
+
+        Employee employee = findEmployee(approval.getEmployeeId());
+        employee.setStatus("APPROVED");
+
+        createWelcomeNotification(employee);
+
+        return approval;
+    }
+
+    // Reject an employee onboarding request
+    public Approval rejectRequest(Long approvalId, String comments) {
+
+        if (comments == null || comments.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Rejection comments are required"
+            );
+        }
+
+        Approval approval = findPendingApproval(approvalId);
+
+        approval.setStatus("REJECTED");
+        approval.setComments(comments);
+        approval.setDecisionDate(LocalDate.now());
+
+        Employee employee = findEmployee(approval.getEmployeeId());
+        employee.setStatus("REJECTED");
+
+        return approval;
+    }
+
+    // Find a pending approval or return an HTTP 404/409 error
+    private Approval findPendingApproval(Long approvalId) {
+
+        Approval approval = approvals.stream()
+                .filter(item -> item.getId().equals(approvalId))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Approval not found"
+                ));
+
+        if (!"PENDING".equals(approval.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "This approval has already been processed"
+            );
+        }
+
+        return approval;
+    }
+
+    private Employee findEmployee(Long employeeId) {
+
+        return employees.stream()
+                .filter(employee -> employee.getId().equals(employeeId))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Employee not found"
+                ));
+    }
+
+    // Generate a simulated welcome notification
+    private void createWelcomeNotification(Employee employee) {
+
+        Notification notification = new Notification();
+
+        notification.setId(notificationIdCounter++);
+        notification.setEmployeeId(employee.getId());
+        notification.setRecipient(employee.getEmail());
+        notification.setMessage(
+                "Welcome " + employee.getName()
+                + "! Your onboarding request has been approved."
+        );
+        notification.setType("WELCOME");
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setStatus("GENERATED");
+
+        notifications.add(notification);
+    }
+
+    public List<Notification> getNotificationsByEmployee(Long employeeId) {
+
+        return notifications.stream()
+                .filter(notification ->
+                        notification.getEmployeeId().equals(employeeId))
+                .toList();
     }
 }
