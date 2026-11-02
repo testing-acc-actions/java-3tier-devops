@@ -5,6 +5,7 @@ import com.company.employee.model.Approval;
 import com.company.employee.model.Employee;
 import com.company.employee.model.OnboardingTask;
 import com.company.employee.model.Notification;
+import com.company.employee.model.OnboardingDashboard;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -198,7 +199,6 @@ public class OnboardingService {
                 .toList();
     }
 
-    // Update an onboarding task
     public OnboardingTask updateTaskStatus(Long taskId, String newStatus) {
 
         OnboardingTask task = tasks.stream()
@@ -244,5 +244,44 @@ public class OnboardingService {
         task.setStatus("COMPLETED");
 
         return task;
+    }
+
+    // Calculate onboarding progress for one employee
+    public OnboardingDashboard getEmployeeDashboard(Long employeeId) {
+
+        Employee employee = findEmployee(employeeId);
+
+        List<OnboardingTask> employeeTasks =
+                getTasksByEmployee(employeeId);
+
+        int totalTasks = employeeTasks.size();
+
+        int completedTasks = (int) employeeTasks.stream()
+                .filter(task -> "COMPLETED".equals(task.getStatus()))
+                .count();
+
+        int pendingTasks = (int) employeeTasks.stream()
+                .filter(task -> "PENDING".equals(task.getStatus()))
+                .count();
+
+        int overdueTasks = (int) employeeTasks.stream()
+                .filter(task ->
+                        "PENDING".equals(task.getStatus())
+                        && task.getDueDate() != null
+                        && task.getDueDate().isBefore(LocalDate.now()))
+                .count();
+
+        double progressPercentage = totalTasks == 0
+                ? 0.0
+                : (completedTasks * 100.0) / totalTasks;
+
+        return new OnboardingDashboard(
+                employee,
+                totalTasks,
+                completedTasks,
+                pendingTasks,
+                overdueTasks,
+                progressPercentage
+        );
     }
 }
