@@ -36,4 +36,17 @@ public class EmployeeController {
 
         return onboardingService.getTasksByEmployee(employeeId);
     }
+
+    @GetMapping("/{employeeId}/tasks")
+    public List<OnboardingTask> getEmployeeTasks(
+        @PathVariable Long employeeId) {
+
+       if (!onboardingService.employeeExists(employeeId)) {
+          throw new org.springframework.web.server.ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Employee not found");
+    }
+
+      return onboardingService.getTasksByEmployee(employeeId);
+    }
 }
