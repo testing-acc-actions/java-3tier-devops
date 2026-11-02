@@ -1,0 +1,53 @@
+name: Java CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "application/**"
+      - ".github/workflows/java-ci.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "application/**"
+      - ".github/workflows/java-ci.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Java Application
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: application
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: application/pom.xml
+
+      - name: Build and test application
+        run: mvn --batch-mode clean verify
+
+      - name: Upload application JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: employee-management-jar
+          path: application/target/employee-management-1.0.0.jar
+          if-no-files-found: error
+          retention-days: 3
