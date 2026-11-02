@@ -1,3 +1,4 @@
+
 package com.company.employee.controller;
 
 import com.company.employee.model.Employee;
@@ -6,6 +7,7 @@ import com.company.employee.service.OnboardingService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -34,19 +36,13 @@ public class EmployeeController {
     public List<OnboardingTask> getEmployeeTasks(
             @PathVariable Long employeeId) {
 
+        if (!onboardingService.employeeExists(employeeId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Employee not found"
+            );
+        }
+
         return onboardingService.getTasksByEmployee(employeeId);
-    }
-
-    @GetMapping("/{employeeId}/tasks")
-    public List<OnboardingTask> getEmployeeTasks(
-        @PathVariable Long employeeId) {
-
-       if (!onboardingService.employeeExists(employeeId)) {
-          throw new org.springframework.web.server.ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Employee not found");
-    }
-
-      return onboardingService.getTasksByEmployee(employeeId);
     }
 }
