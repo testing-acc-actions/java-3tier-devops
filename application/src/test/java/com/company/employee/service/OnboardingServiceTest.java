@@ -83,6 +83,75 @@ class OnboardingServiceTest {
 
         assertTrue(tasks.stream()
                 .allMatch(task -> "PENDING".equals(task.getStatus())));
+        @Test
+void taskCannotBeCompletedBeforeManagerApproval() {
+    Employee employee = registerTestEmployee();
+
+    OnboardingTask task =
+            onboardingService.getTasksByEmployee(employee.getId()).get(0);
+
+    assertThrows(ResponseStatusException.class, () ->
+            onboardingService.updateTaskStatus(task.getId(), "COMPLETED")
+    );
+
+    assertEquals("PENDING", task.getStatus());
+}
+
+@Test
+void taskCanBeCompletedAfterManagerApproval() {
+    Employee employee = registerTestEmployee();
+
+    Approval approval =
+            onboardingService.getPendingApprovals().get(0);
+
+    onboardingService.approveRequest(approval.getId());
+
+    OnboardingTask task =
+            onboardingService.getTasksByEmployee(employee.getId()).get(0);
+
+    OnboardingTask result =
+            onboardingService.updateTaskStatus(task.getId(), "COMPLETED");
+
+    assertEquals("COMPLETED", result.getStatus());
+}
+
+@Test
+void completedTaskCannotBeCompletedAgain() {
+    Employee employee = registerTestEmployee();
+
+    Approval approval =
+            onboardingService.getPendingApprovals().get(0);
+
+    onboardingService.approveRequest(approval.getId());
+
+    OnboardingTask task =
+            onboardingService.getTasksByEmployee(employee.getId()).get(0);
+
+    onboardingService.updateTaskStatus(task.getId(), "COMPLETED");
+
+    assertThrows(ResponseStatusException.class, () ->
+            onboardingService.updateTaskStatus(task.getId(), "COMPLETED")
+    );
+}
+
+@Test
+void invalidTaskStatusShouldBeRejected() {
+    Employee employee = registerTestEmployee();
+
+    Approval approval =
+            onboardingService.getPendingApprovals().get(0);
+
+    onboardingService.approveRequest(approval.getId());
+
+    OnboardingTask task =
+            onboardingService.getTasksByEmployee(employee.getId()).get(0);
+
+    assertThrows(ResponseStatusException.class, () ->
+            onboardingService.updateTaskStatus(task.getId(), "IN_PROGRESS")
+    );
+
+    assertEquals("PENDING", task.getStatus());
+
     }
 
     @Test
