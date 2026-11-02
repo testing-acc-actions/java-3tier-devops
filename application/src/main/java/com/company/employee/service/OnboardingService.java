@@ -72,6 +72,20 @@ public class OnboardingService {
     public boolean employeeExists(Long employeeId) {
     return employees.stream()
             .anyMatch(employee -> employee.getId().equals(employeeId));
-    }
+    } 
+
+    private void createApproval(Employee employee) {
+
+    Approval approval = new Approval();
+
+    approval.setId(approvalIdCounter++);
+    approval.setEmployeeId(employee.getId());
+    approval.setManagerName(employee.getManagerName());
+    approval.setStatus("PENDING");
+    approval.setComments("Awaiting manager review");
+    approval.setDecisionDate(null);
+
+    approvals.add(approval);
+  }
     
 }
