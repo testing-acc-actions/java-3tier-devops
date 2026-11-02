@@ -1,4 +1,6 @@
+
 package com.company.employee.service;
+
 import com.company.employee.model.Approval;
 import com.company.employee.model.Employee;
 import com.company.employee.model.OnboardingTask;
@@ -15,10 +17,10 @@ public class OnboardingService {
     private final List<Employee> employees = new ArrayList<>();
     private final List<OnboardingTask> tasks = new ArrayList<>();
     private final List<Approval> approvals = new ArrayList<>();
-    private Long approvalIdCounter = 1L;
 
     private Long employeeIdCounter = 1L;
     private Long taskIdCounter = 1L;
+    private Long approvalIdCounter = 1L;
 
     public Employee registerEmployee(Employee employee) {
 
@@ -28,6 +30,9 @@ public class OnboardingService {
         employees.add(employee);
 
         generateOnboardingTasks(employee);
+
+        // Create a manager approval record for this employee
+        createApproval(employee);
 
         return employee;
     }
@@ -58,6 +63,20 @@ public class OnboardingService {
         tasks.add(task);
     }
 
+    private void createApproval(Employee employee) {
+
+        Approval approval = new Approval();
+
+        approval.setId(approvalIdCounter++);
+        approval.setEmployeeId(employee.getId());
+        approval.setManagerName(employee.getManagerName());
+        approval.setStatus("PENDING");
+        approval.setComments("Awaiting manager review");
+        approval.setDecisionDate(null);
+
+        approvals.add(approval);
+    }
+
     public List<Employee> getAllEmployees() {
         return employees;
     }
@@ -70,22 +89,8 @@ public class OnboardingService {
     }
 
     public boolean employeeExists(Long employeeId) {
-    return employees.stream()
-            .anyMatch(employee -> employee.getId().equals(employeeId));
-    } 
 
-    private void createApproval(Employee employee) {
-
-    Approval approval = new Approval();
-
-    approval.setId(approvalIdCounter++);
-    approval.setEmployeeId(employee.getId());
-    approval.setManagerName(employee.getManagerName());
-    approval.setStatus("PENDING");
-    approval.setComments("Awaiting manager review");
-    approval.setDecisionDate(null);
-
-    approvals.add(approval);
-  }
-    
+        return employees.stream()
+                .anyMatch(employee -> employee.getId().equals(employeeId));
+    }
 }
