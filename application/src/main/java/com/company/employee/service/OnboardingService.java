@@ -6,9 +6,9 @@ import com.company.employee.model.Employee;
 import com.company.employee.model.OnboardingTask;
 import com.company.employee.model.Notification;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +41,7 @@ public class OnboardingService {
     }
 
     private void generateOnboardingTasks(Employee employee) {
+
         createTask(employee, "Laptop allocation", "IT");
         createTask(employee, "Email setup", "IT");
         createTask(employee, "Software access", "IT");
@@ -84,23 +85,25 @@ public class OnboardingService {
     }
 
     public List<Approval> getPendingApprovals() {
+
         return approvals.stream()
                 .filter(approval -> "PENDING".equals(approval.getStatus()))
                 .toList();
     }
 
     public List<OnboardingTask> getTasksByEmployee(Long employeeId) {
+
         return tasks.stream()
                 .filter(task -> task.getEmployeeId().equals(employeeId))
                 .toList();
     }
 
     public boolean employeeExists(Long employeeId) {
+
         return employees.stream()
                 .anyMatch(employee -> employee.getId().equals(employeeId));
     }
 
-    // Approve an employee onboarding request
     public Approval approveRequest(Long approvalId) {
 
         Approval approval = findPendingApproval(approvalId);
@@ -117,7 +120,6 @@ public class OnboardingService {
         return approval;
     }
 
-    // Reject an employee onboarding request
     public Approval rejectRequest(Long approvalId, String comments) {
 
         if (comments == null || comments.isBlank()) {
@@ -139,7 +141,6 @@ public class OnboardingService {
         return approval;
     }
 
-    // Find a pending approval or return an HTTP 404/409 error
     private Approval findPendingApproval(Long approvalId) {
 
         Approval approval = approvals.stream()
@@ -171,7 +172,6 @@ public class OnboardingService {
                 ));
     }
 
-    // Generate a simulated welcome notification
     private void createWelcomeNotification(Employee employee) {
 
         Notification notification = new Notification();
@@ -196,5 +196,53 @@ public class OnboardingService {
                 .filter(notification ->
                         notification.getEmployeeId().equals(employeeId))
                 .toList();
+    }
+
+    // Update an onboarding task
+    public OnboardingTask updateTaskStatus(Long taskId, String newStatus) {
+
+        OnboardingTask task = tasks.stream()
+                .filter(item -> item.getId().equals(taskId))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Task not found"
+                ));
+
+        if (!"PENDING".equals(task.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Only pending tasks can be updated"
+            );
+        }
+
+        if (!"COMPLETED".equals(newStatus)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only COMPLETED status is supported"
+            );
+        }
+
+        Employee employee = findEmployee(task.getEmployeeId());
+
+        if ("IT".equals(task.getAssignedTeam())
+                && !"APPROVED".equals(employee.getStatus())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Manager approval is required before IT provisioning"
+            );
+        }
+
+        if (!"APPROVED".equals(employee.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Employee onboarding must be approved before task completion"
+            );
+        }
+
+        task.setStatus("COMPLETED");
+
+        return task;
     }
 }
