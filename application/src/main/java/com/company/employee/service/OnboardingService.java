@@ -32,6 +32,7 @@ public class OnboardingService {
         generateOnboardingTasks(employee);
 
         // Create a manager approval record for this employee
+        getPendingApprovals()
         createApproval(employee);
 
         return employee;
