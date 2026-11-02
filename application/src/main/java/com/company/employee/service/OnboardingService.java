@@ -14,14 +14,17 @@ import java.util.List;
 @Service
 public class OnboardingService {
 
+    // Temporary in-memory storage
     private final List<Employee> employees = new ArrayList<>();
     private final List<OnboardingTask> tasks = new ArrayList<>();
     private final List<Approval> approvals = new ArrayList<>();
 
+    // Unique ID counters
     private Long employeeIdCounter = 1L;
     private Long taskIdCounter = 1L;
     private Long approvalIdCounter = 1L;
 
+    // Register a new employee
     public Employee registerEmployee(Employee employee) {
 
         employee.setId(employeeIdCounter++);
@@ -29,15 +32,16 @@ public class OnboardingService {
 
         employees.add(employee);
 
+        // Automatically generate five onboarding tasks
         generateOnboardingTasks(employee);
 
-        // Create a manager approval record for this employee
-        getPendingApprovals()
+        // Automatically create manager approval
         createApproval(employee);
 
         return employee;
     }
 
+    // Generate standard onboarding tasks
     private void generateOnboardingTasks(Employee employee) {
 
         createTask(employee, "Laptop allocation", "IT");
@@ -47,6 +51,7 @@ public class OnboardingService {
         createTask(employee, "Team introduction", "Manager");
     }
 
+    // Create an individual onboarding task
     private void createTask(
             Employee employee,
             String taskName,
@@ -64,6 +69,7 @@ public class OnboardingService {
         tasks.add(task);
     }
 
+    // Create manager approval record
     private void createApproval(Employee employee) {
 
         Approval approval = new Approval();
@@ -78,16 +84,20 @@ public class OnboardingService {
         approvals.add(approval);
     }
 
+    // Retrieve all employees
     public List<Employee> getAllEmployees() {
         return employees;
     }
+
+    // Retrieve all pending manager approvals
     public List<Approval> getPendingApprovals() {
 
-    return approvals.stream()
-            .filter(approval -> approval.getStatus().equals("PENDING"))
-            .toList();
-   }
+        return approvals.stream()
+                .filter(approval -> "PENDING".equals(approval.getStatus()))
+                .toList();
+    }
 
+    // Retrieve tasks belonging to one employee
     public List<OnboardingTask> getTasksByEmployee(Long employeeId) {
 
         return tasks.stream()
@@ -95,6 +105,7 @@ public class OnboardingService {
                 .toList();
     }
 
+    // Check whether an employee exists
     public boolean employeeExists(Long employeeId) {
 
         return employees.stream()
