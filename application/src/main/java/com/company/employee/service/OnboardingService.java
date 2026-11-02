@@ -14,6 +14,8 @@ public class OnboardingService {
 
     private final List<Employee> employees = new ArrayList<>();
     private final List<OnboardingTask> tasks = new ArrayList<>();
+    private final List<Approval> approvals = new ArrayList<>();
+    private Long approvalIdCounter = 1L;
 
     private Long employeeIdCounter = 1L;
     private Long taskIdCounter = 1L;
@@ -71,4 +73,5 @@ public class OnboardingService {
     return employees.stream()
             .anyMatch(employee -> employee.getId().equals(employeeId));
     }
+    
 }
