@@ -1,10 +1,10 @@
 
 package com.company.employee.service;
 
-import com.company.employee.model.Employee;
-import com.company.employee.model.OnboardingTask;
 import com.company.employee.model.Approval;
+import com.company.employee.model.Employee;
 import com.company.employee.model.Notification;
+import com.company.employee.model.OnboardingTask;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,75 +83,6 @@ class OnboardingServiceTest {
 
         assertTrue(tasks.stream()
                 .allMatch(task -> "PENDING".equals(task.getStatus())));
-        @Test
-void taskCannotBeCompletedBeforeManagerApproval() {
-    Employee employee = registerTestEmployee();
-
-    OnboardingTask task =
-            onboardingService.getTasksByEmployee(employee.getId()).get(0);
-
-    assertThrows(ResponseStatusException.class, () ->
-            onboardingService.updateTaskStatus(task.getId(), "COMPLETED")
-    );
-
-    assertEquals("PENDING", task.getStatus());
-}
-
-@Test
-void taskCanBeCompletedAfterManagerApproval() {
-    Employee employee = registerTestEmployee();
-
-    Approval approval =
-            onboardingService.getPendingApprovals().get(0);
-
-    onboardingService.approveRequest(approval.getId());
-
-    OnboardingTask task =
-            onboardingService.getTasksByEmployee(employee.getId()).get(0);
-
-    OnboardingTask result =
-            onboardingService.updateTaskStatus(task.getId(), "COMPLETED");
-
-    assertEquals("COMPLETED", result.getStatus());
-}
-
-@Test
-void completedTaskCannotBeCompletedAgain() {
-    Employee employee = registerTestEmployee();
-
-    Approval approval =
-            onboardingService.getPendingApprovals().get(0);
-
-    onboardingService.approveRequest(approval.getId());
-
-    OnboardingTask task =
-            onboardingService.getTasksByEmployee(employee.getId()).get(0);
-
-    onboardingService.updateTaskStatus(task.getId(), "COMPLETED");
-
-    assertThrows(ResponseStatusException.class, () ->
-            onboardingService.updateTaskStatus(task.getId(), "COMPLETED")
-    );
-}
-
-@Test
-void invalidTaskStatusShouldBeRejected() {
-    Employee employee = registerTestEmployee();
-
-    Approval approval =
-            onboardingService.getPendingApprovals().get(0);
-
-    onboardingService.approveRequest(approval.getId());
-
-    OnboardingTask task =
-            onboardingService.getTasksByEmployee(employee.getId()).get(0);
-
-    assertThrows(ResponseStatusException.class, () ->
-            onboardingService.updateTaskStatus(task.getId(), "IN_PROGRESS")
-    );
-
-    assertEquals("PENDING", task.getStatus());
-
     }
 
     @Test
@@ -233,5 +164,75 @@ void invalidTaskStatusShouldBeRejected() {
         assertThrows(ResponseStatusException.class, () ->
                 onboardingService.approveRequest(approval.getId())
         );
+    }
+
+    @Test
+    void taskCannotBeCompletedBeforeManagerApproval() {
+        Employee employee = registerTestEmployee();
+
+        OnboardingTask task =
+                onboardingService.getTasksByEmployee(employee.getId()).get(0);
+
+        assertThrows(ResponseStatusException.class, () ->
+                onboardingService.updateTaskStatus(task.getId(), "COMPLETED")
+        );
+
+        assertEquals("PENDING", task.getStatus());
+    }
+
+    @Test
+    void taskCanBeCompletedAfterManagerApproval() {
+        Employee employee = registerTestEmployee();
+
+        Approval approval =
+                onboardingService.getPendingApprovals().get(0);
+
+        onboardingService.approveRequest(approval.getId());
+
+        OnboardingTask task =
+                onboardingService.getTasksByEmployee(employee.getId()).get(0);
+
+        OnboardingTask result =
+                onboardingService.updateTaskStatus(task.getId(), "COMPLETED");
+
+        assertEquals("COMPLETED", result.getStatus());
+    }
+
+    @Test
+    void completedTaskCannotBeCompletedAgain() {
+        Employee employee = registerTestEmployee();
+
+        Approval approval =
+                onboardingService.getPendingApprovals().get(0);
+
+        onboardingService.approveRequest(approval.getId());
+
+        OnboardingTask task =
+                onboardingService.getTasksByEmployee(employee.getId()).get(0);
+
+        onboardingService.updateTaskStatus(task.getId(), "COMPLETED");
+
+        assertThrows(ResponseStatusException.class, () ->
+                onboardingService.updateTaskStatus(task.getId(), "COMPLETED")
+        );
+    }
+
+    @Test
+    void invalidTaskStatusShouldBeRejected() {
+        Employee employee = registerTestEmployee();
+
+        Approval approval =
+                onboardingService.getPendingApprovals().get(0);
+
+        onboardingService.approveRequest(approval.getId());
+
+        OnboardingTask task =
+                onboardingService.getTasksByEmployee(employee.getId()).get(0);
+
+        assertThrows(ResponseStatusException.class, () ->
+                onboardingService.updateTaskStatus(task.getId(), "IN_PROGRESS")
+        );
+
+        assertEquals("PENDING", task.getStatus());
     }
 }
