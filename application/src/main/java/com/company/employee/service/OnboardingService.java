@@ -80,6 +80,12 @@ public class OnboardingService {
     public List<Employee> getAllEmployees() {
         return employees;
     }
+    public List<Approval> getPendingApprovals() {
+
+    return approvals.stream()
+            .filter(approval -> approval.getStatus().equals("PENDING"))
+            .toList();
+   }
 
     public List<OnboardingTask> getTasksByEmployee(Long employeeId) {
 
