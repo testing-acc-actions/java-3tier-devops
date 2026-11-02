@@ -1,18 +1,27 @@
 package com.company.employee.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Map;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RestController
-public class HealthController {
+@SpringBootTest
+@AutoConfigureMockMvc
+class HealthControllerTest {
 
-    @GetMapping("/api/health")
-    public Map<String, String> health() {
-        return Map.of(
-            "status", "UP",
-            "application", "employee-management"
-        );
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void healthEndpointShouldReturnUpStatus() throws Exception {
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.application").value("employee-management"));
     }
 }
