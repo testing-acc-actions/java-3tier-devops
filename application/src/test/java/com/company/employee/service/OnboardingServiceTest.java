@@ -254,17 +254,19 @@ class OnboardingServiceTest {
         assertEquals(1, dashboard.getCompletedTasks());
         assertEquals(4, dashboard.getPendingTasks());
         assertEquals(20.0, dashboard.getProgressPercentage());
-        @Test
-        void dashboardShouldCountOverduePendingTasks() {
+    }
+
+    @Test
+    void dashboardShouldCountOverduePendingTasks() {
         Employee employee = registerTestEmployee();
 
         OnboardingTask task =
-            onboardingService.getTasksByEmployee(employee.getId()).get(0);
+                onboardingService.getTasksByEmployee(employee.getId()).get(0);
 
-            task.setDueDate(LocalDate.now().minusDays(1));
+        task.setDueDate(LocalDate.now().minusDays(1));
 
         var dashboard =
-            onboardingService.getEmployeeDashboard(employee.getId());
+                onboardingService.getEmployeeDashboard(employee.getId());
 
         assertEquals(5, dashboard.getTotalTasks());
         assertEquals(5, dashboard.getPendingTasks());
