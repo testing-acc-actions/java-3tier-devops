@@ -98,19 +98,21 @@ public class OnboardingTask {
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
+
+    // Temporary compatibility methods for the existing service.
     @Transient
     public Long getEmployeeId() {
-    return employee == null ? null : employee.getId();
+        return employee == null ? null : employee.getId();
     }
 
     @Transient
     public void setEmployeeId(Long employeeId) {
-    if (employeeId == null) {
-        this.employee = null;
-    } else {
-        Employee employeeReference = new Employee();
-        employeeReference.setId(employeeId);
-        this.employee = employeeReference;
+        if (employeeId == null) {
+            this.employee = null;
+        } else {
+            Employee employeeReference = new Employee();
+            employeeReference.setId(employeeId);
+            this.employee = employeeReference;
+        }
     }
-
 }
