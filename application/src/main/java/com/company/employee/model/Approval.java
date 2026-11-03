@@ -106,4 +106,21 @@ public class Approval {
     public void setDecisionDate(LocalDate decisionDate) {
         this.decisionDate = decisionDate;
     }
+
+    // Temporary compatibility methods for the existing service.
+    @Transient
+    public Long getEmployeeId() {
+        return employee == null ? null : employee.getId();
+    }
+
+    @Transient
+    public void setEmployeeId(Long employeeId) {
+        if (employeeId == null) {
+            this.employee = null;
+        } else {
+            Employee employeeReference = new Employee();
+            employeeReference.setId(employeeId);
+            this.employee = employeeReference;
+        }
+    }
 }
