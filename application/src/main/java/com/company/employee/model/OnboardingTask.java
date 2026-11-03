@@ -1,14 +1,36 @@
+
 package com.company.employee.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "onboarding_tasks")
 public class OnboardingTask {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "task_id")
     private Long id;
-    private Long employeeId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "employee_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_task_employee")
+    )
+    private Employee employee;
+
+    @Column(name = "task_name", nullable = false, length = 150)
     private String taskName;
+
+    @Column(name = "assigned_team", nullable = false, length = 50)
     private String assignedTeam;
+
+    @Column(nullable = false, length = 30)
     private String status;
+
+    @Column(name = "due_date")
     private LocalDate dueDate;
 
     public OnboardingTask() {
@@ -16,14 +38,13 @@ public class OnboardingTask {
 
     public OnboardingTask(
             Long id,
-            Long employeeId,
+            Employee employee,
             String taskName,
             String assignedTeam,
             String status,
             LocalDate dueDate) {
-
         this.id = id;
-        this.employeeId = employeeId;
+        this.employee = employee;
         this.taskName = taskName;
         this.assignedTeam = assignedTeam;
         this.status = status;
@@ -38,12 +59,12 @@ public class OnboardingTask {
         this.id = id;
     }
 
-    public Long getEmployeeId() {
-        return employeeId;
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     public String getTaskName() {
