@@ -1,4 +1,3 @@
-
 package com.company.employee.repository;
 
 import com.company.employee.model.OnboardingTask;
@@ -11,9 +10,9 @@ import java.util.List;
 public interface OnboardingTaskRepository
         extends JpaRepository<OnboardingTask, Long> {
 
-    List<OnboardingTask> findByEmployeeId(Long employeeId);
+    List<OnboardingTask> findByEmployee_Id(Long employeeId);
 
-    List<OnboardingTask> findByEmployeeIdAndStatus(
+    List<OnboardingTask> findByEmployee_IdAndStatus(
             Long employeeId,
             String status
     );
