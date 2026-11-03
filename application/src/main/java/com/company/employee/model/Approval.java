@@ -1,14 +1,44 @@
+
 package com.company.employee.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 
+@Entity
+@Table(
+    name = "approvals",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_approval_employee",
+            columnNames = "employee_id"
+        )
+    }
+)
 public class Approval {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "approval_id")
     private Long id;
-    private Long employeeId;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "employee_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_approval_employee")
+    )
+    private Employee employee;
+
+    @Column(name = "manager_name", nullable = false, length = 100)
     private String managerName;
+
+    @Column(nullable = false, length = 30)
     private String status;
+
+    @Column(length = 500)
     private String comments;
+
+    @Column(name = "decision_date")
     private LocalDate decisionDate;
 
     public Approval() {
@@ -16,14 +46,13 @@ public class Approval {
 
     public Approval(
             Long id,
-            Long employeeId,
+            Employee employee,
             String managerName,
             String status,
             String comments,
             LocalDate decisionDate) {
-
         this.id = id;
-        this.employeeId = employeeId;
+        this.employee = employee;
         this.managerName = managerName;
         this.status = status;
         this.comments = comments;
@@ -38,12 +67,12 @@ public class Approval {
         this.id = id;
     }
 
-    public Long getEmployeeId() {
-        return employeeId;
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     public String getManagerName() {
